@@ -20,10 +20,10 @@
 	<dubbo:protocol name="dubbo" port="20880" />
 
 	<!-- 声明需要暴露的服务接口 -->
-	<dubbo:service interface="com.netease.dubbo.service.HelloService"
+	<dubbo:service interface="com.netease.hystrix.dubbo.service.HelloService"
 		ref="helloService" />
 
 	<!-- 和本地bean一样实现服务 -->
-	<bean id="helloService" class="com.netease.dubbo.provider.HelloServiceImpl" />
+	<bean id="helloService" class="com.netease.hystrix.dubbo.service.HelloServiceImpl" />
 
 </beans>

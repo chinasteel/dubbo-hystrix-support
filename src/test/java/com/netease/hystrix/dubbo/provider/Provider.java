@@ -1,4 +1,4 @@
-package com.netease.dubbo.provider;
+package com.netease.hystrix.dubbo.provider;
 
 import java.io.IOException;
 

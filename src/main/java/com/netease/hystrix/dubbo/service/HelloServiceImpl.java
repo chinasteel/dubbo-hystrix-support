@@ -1,8 +1,6 @@
-package com.netease.dubbo.provider;
+package com.netease.hystrix.dubbo.service;
 
 import org.apache.commons.lang.math.RandomUtils;
-
-import com.netease.dubbo.service.HelloService;
 
 public class HelloServiceImpl implements HelloService {
 

@@ -19,7 +19,7 @@
 
 	<!-- 生成远程服务代理，可以和本地bean一样使用demoService -->
 	<dubbo:reference id="helloService"
-		interface="com.netease.dubbo.service.HelloService" timeout="5000">
+		interface="com.netease.hystrix.dubbo.service.HelloService" timeout="5000">
 	</dubbo:reference>
 
 </beans>

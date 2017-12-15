@@ -1,4 +1,4 @@
-package com.netease.dubbo.consumer;
+package com.netease.hystrix.dubbo.consumer;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.netease.dubbo.service.HelloService;
+import com.netease.hystrix.dubbo.service.HelloService;
 
 public class Consumer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Consumer.class);

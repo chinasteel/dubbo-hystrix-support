@@ -1,4 +1,4 @@
-package com.netease.dubbo.service;
+package com.netease.hystrix.dubbo.service;
 
 public interface HelloService {
 
