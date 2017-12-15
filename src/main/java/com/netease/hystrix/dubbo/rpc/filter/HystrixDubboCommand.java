@@ -22,8 +22,6 @@ import com.netflix.hystrix.HystrixThreadPoolProperties;
 public class HystrixDubboCommand extends HystrixCommand<Result> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HystrixDubboCommand.class);
 
-	// private static final ConcurrentMap<String, HystrixDubboCommand>
-	// CONCURRNTMAP = new ConcurrentHashMap<>();
 	private static final int DEFAULT_THREADPOOL_CORE_SIZE = 30;
 	/** 分隔符 */
 	private static final String SPLITOR = ".";
