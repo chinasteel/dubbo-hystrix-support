@@ -34,7 +34,13 @@ public class Consumer {
         System.in.read(); // 按任意键退出
         
         for (int i = 0; i < total; i++) {
-        	LOGGER.info(service.sayHello("steel-" + atomicInteger.incrementAndGet()));
+        	String result = null;
+        	try {
+        		result = service.sayHello("steel-" + atomicInteger.incrementAndGet());
+			} catch (Exception e) {// dubbo 调用超时或者其他异常捕获
+				LOGGER.error(e.getMessage(),e);
+			}
+        	LOGGER.info(result);
         }
         
         Thread.sleep(10000);
