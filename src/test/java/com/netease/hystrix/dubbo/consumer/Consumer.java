@@ -19,7 +19,7 @@ public class Consumer {
         context.start();
         final HelloService service = context.getBean("helloService", HelloService.class);
         ExecutorService executorService = Executors.newCachedThreadPool();
-        int total = 50;
+        int total = 40;
         final AtomicInteger atomicInteger = new AtomicInteger(0);
         for (int i = 0; i < total; i++) {
             executorService.submit(new Runnable() {
@@ -43,8 +43,7 @@ public class Consumer {
         	LOGGER.info(result);
         }
         
-        Thread.sleep(10000);
-        LOGGER.info("withCircuitBreakerSleepWindowInMilliseconds after 10000");
+        System.in.read(); // 按任意键退出
         for (int i = 0; i < total; i++) {
             executorService.submit(new Runnable() {
 

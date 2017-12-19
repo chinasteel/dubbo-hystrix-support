@@ -12,6 +12,7 @@ import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.rpc.Invocation;
 import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Result;
+import com.alibaba.dubbo.rpc.RpcException;
 import com.alibaba.dubbo.rpc.RpcResult;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
@@ -33,9 +34,9 @@ public class HystrixDubboCommand extends HystrixCommand<Result> {
 				.andCommandKey(HystrixCommandKey.Factory.asKey(getServiceId(invoker, invocation)))
 				.andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
 						// 请求容量阈值
-						.withCircuitBreakerRequestVolumeThreshold(200)
-						// 熔断器中断请求10秒后会进入半打开状态,放部分流量过去重试
-						.withCircuitBreakerSleepWindowInMilliseconds(10000)
+						.withCircuitBreakerRequestVolumeThreshold(20)
+						// 熔断器中断请求30秒后会进入半打开状态,放部分流量过去重试
+						.withCircuitBreakerSleepWindowInMilliseconds(30000)
 						// 错误率达到50开启熔断保护
 						.withCircuitBreakerErrorThresholdPercentage(50)
 						// 使用dubbo的超时，禁用这里的超时
@@ -58,10 +59,15 @@ public class HystrixDubboCommand extends HystrixCommand<Result> {
 
 	@Override
 	protected Result getFallback() {
+		Throwable throwable = this.getFailedExecutionException();
+		if(throwable instanceof RpcException) {
+			return fallBackTimeOutResult;
+		}
 		return fallBackResult;
 	}
 
 	private Result fallBackResult = new RpcResult("服务降级..");
+	private Result fallBackTimeOutResult = new RpcResult("RPC timeout ..");
 
 	/**
 	 * 获取线程池大小
