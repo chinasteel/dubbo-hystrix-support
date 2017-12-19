@@ -15,7 +15,7 @@ public class Consumer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Consumer.class);
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { "consumer.xml" });
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { "classpath:spring/consumer.xml" });
         context.start();
         final HelloService service = context.getBean("helloService", HelloService.class);
         ExecutorService executorService = Executors.newCachedThreadPool();
