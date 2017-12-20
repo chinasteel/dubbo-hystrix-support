@@ -4,8 +4,6 @@ import java.lang.reflect.Type;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.DigestUtils;
 
 import com.alibaba.dubbo.common.URL;
@@ -18,10 +16,10 @@ import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
 import com.netflix.hystrix.HystrixCommandProperties;
+import com.netflix.hystrix.HystrixThreadPoolKey;
 import com.netflix.hystrix.HystrixThreadPoolProperties;
 
 public class HystrixDubboCommand extends HystrixCommand<Result> {
-	private static final Logger LOGGER = LoggerFactory.getLogger(HystrixDubboCommand.class);
 
 	private static final int DEFAULT_THREADPOOL_CORE_SIZE = 30;
 	/** 分隔符 */
@@ -32,6 +30,7 @@ public class HystrixDubboCommand extends HystrixCommand<Result> {
 	public HystrixDubboCommand(Invoker<?> invoker, Invocation invocation) {
 		super(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(invoker.getInterface().getName()))
 				.andCommandKey(HystrixCommandKey.Factory.asKey(getServiceId(invoker, invocation)))
+				.andThreadPoolKey(HystrixThreadPoolKey.Factory.asKey(getServiceId(invoker, invocation)))
 				.andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
 						// 请求容量阈值
 						.withCircuitBreakerRequestVolumeThreshold(20)
@@ -77,11 +76,7 @@ public class HystrixDubboCommand extends HystrixCommand<Result> {
 	 */
 	private static int getThreadPoolCoreSize(URL url) {
 		if (url != null) {
-			int size = url.getParameter("ThreadPoolCoreSize", DEFAULT_THREADPOOL_CORE_SIZE);
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("ThreadPoolCoreSize:" + size);
-			}
-			return size;
+			return url.getParameter("ThreadPoolCoreSize", DEFAULT_THREADPOOL_CORE_SIZE);
 		}
 
 		return DEFAULT_THREADPOOL_CORE_SIZE;

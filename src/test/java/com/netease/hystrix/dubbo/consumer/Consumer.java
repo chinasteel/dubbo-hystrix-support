@@ -18,9 +18,21 @@ public class Consumer {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { "classpath:spring/consumer.xml" });
         context.start();
         final HelloService service = context.getBean("helloService", HelloService.class);
-        ExecutorService executorService = Executors.newCachedThreadPool();
-        int total = 40;
         final AtomicInteger atomicInteger = new AtomicInteger(0);
+        
+        int total = 40;
+        for (int i = 0; i < total; i++) {
+        	String result = null;
+        	try {
+        		result = service.sayHello("steel-" + atomicInteger.incrementAndGet());
+			} catch (Exception e) {// dubbo 调用超时或者其他异常捕获
+				LOGGER.error(e.getMessage(),e);
+			}
+        	LOGGER.info(result);
+        }
+        System.in.read(); // 按任意键退出
+        
+        ExecutorService executorService = Executors.newCachedThreadPool();
         for (int i = 0; i < total; i++) {
             executorService.submit(new Runnable() {
 
@@ -33,17 +45,6 @@ public class Consumer {
         }
         System.in.read(); // 按任意键退出
         
-        for (int i = 0; i < total; i++) {
-        	String result = null;
-        	try {
-        		result = service.sayHello("steel-" + atomicInteger.incrementAndGet());
-			} catch (Exception e) {// dubbo 调用超时或者其他异常捕获
-				LOGGER.error(e.getMessage(),e);
-			}
-        	LOGGER.info(result);
-        }
-        
-        System.in.read(); // 按任意键退出
         for (int i = 0; i < total; i++) {
             executorService.submit(new Runnable() {
 
