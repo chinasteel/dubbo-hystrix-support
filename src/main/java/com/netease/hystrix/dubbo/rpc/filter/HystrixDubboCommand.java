@@ -16,6 +16,7 @@ import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
 import com.netflix.hystrix.HystrixCommandProperties;
+import com.netflix.hystrix.HystrixCommandProperties.ExecutionIsolationStrategy;
 import com.netflix.hystrix.HystrixThreadPoolKey;
 import com.netflix.hystrix.HystrixThreadPoolProperties;
 
@@ -32,6 +33,11 @@ public class HystrixDubboCommand extends HystrixCommand<Result> {
 				.andCommandKey(HystrixCommandKey.Factory.asKey(getServiceId(invoker, invocation)))
 				.andThreadPoolKey(HystrixThreadPoolKey.Factory.asKey(getServiceId(invoker, invocation)))
 				.andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
+						/* 设置HystrixCommand.run()的隔离策略 
+						 * THREAD —— 在固定大小线程池中，以单独线程执行，并发请求数受限于线程池大小。
+						 * SEMAPHORE —— 在调用线程中执行，通过信号量来限制并发量。
+						*/
+						.withExecutionIsolationStrategy(ExecutionIsolationStrategy.THREAD)
 						// 请求容量阈值
 						.withCircuitBreakerRequestVolumeThreshold(20)
 						// 熔断器中断请求30秒后会进入半打开状态,放部分流量过去重试
@@ -40,12 +46,15 @@ public class HystrixDubboCommand extends HystrixCommand<Result> {
 						.withCircuitBreakerErrorThresholdPercentage(50)
 						// 使用dubbo的超时，禁用这里的超时
 						.withExecutionTimeoutEnabled(false)
-						// 允许最大并发执行的数量
-						.withExecutionIsolationSemaphoreMaxConcurrentRequests(500)
-						.withFallbackIsolationSemaphoreMaxConcurrentRequests(500))
+						// 设置当使用ExecutionIsolationStrategy.SEMAPHORE时，HystrixCommand.run()方法允许的最大请求数。如果达到最大并发数时，后续请求会被拒绝。
+						/*.withExecutionIsolationSemaphoreMaxConcurrentRequests(500)*/
+						)
+				// 线程池大小不能太大
 				.andThreadPoolPropertiesDefaults(
-						HystrixThreadPoolProperties.Setter().withCoreSize(getThreadPoolCoreSize(invoker.getUrl()))// 线程池为30
-								.withMaxQueueSize(1000)));
+						HystrixThreadPoolProperties.Setter()
+						.withCoreSize(getThreadPoolCoreSize(invoker.getUrl()))// 核心线程池大小
+						.withQueueSizeRejectionThreshold(20)// 设置队列拒绝的阈值——一个人为设置的拒绝访问的最大队列值，即使maxQueueSize还没有达到。
+						.withMaxQueueSize(1024)));// 设置BlockingQueue最大的队列值。
 
 		this.invoker = invoker;
 		this.invocation = invocation;
