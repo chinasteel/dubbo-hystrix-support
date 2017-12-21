@@ -1,11 +1,5 @@
 package com.netease.hystrix.dubbo.rpc.filter;
 
-import java.lang.reflect.Type;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.util.DigestUtils;
-
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.rpc.Invocation;
 import com.alibaba.dubbo.rpc.Invoker;
@@ -23,15 +17,13 @@ import com.netflix.hystrix.HystrixThreadPoolProperties;
 public class HystrixDubboCommand extends HystrixCommand<Result> {
 
 	private static final int DEFAULT_THREADPOOL_CORE_SIZE = 30;
-	/** 分隔符 */
-	private static final String SPLITOR = ".";
 	private final Invoker<?> invoker;
 	private final Invocation invocation;
 
-	public HystrixDubboCommand(Invoker<?> invoker, Invocation invocation) {
+	public HystrixDubboCommand(Invoker<?> invoker, Invocation invocation, String serviceId) {
 		super(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(invoker.getInterface().getName()))
-				.andCommandKey(HystrixCommandKey.Factory.asKey(getServiceId(invoker, invocation)))
-				.andThreadPoolKey(HystrixThreadPoolKey.Factory.asKey(getServiceId(invoker, invocation)))
+				.andCommandKey(HystrixCommandKey.Factory.asKey(serviceId))
+				.andThreadPoolKey(HystrixThreadPoolKey.Factory.asKey(serviceId))
 				.andCommandPropertiesDefaults(HystrixCommandProperties.Setter()
 						/* 设置HystrixCommand.run()的隔离策略 
 						 * THREAD —— 在固定大小线程池中，以单独线程执行，并发请求数受限于线程池大小。
@@ -90,30 +82,6 @@ public class HystrixDubboCommand extends HystrixCommand<Result> {
 
 		return DEFAULT_THREADPOOL_CORE_SIZE;
 
-	}
-
-	/**
-	 * 取得服务唯一标识，serviceId会加上方法参数类型摘要前8位，支持方法重载
-	 * 
-	 * @author gengchaogang
-	 * @dateTime 2017年12月13日 上午10:55:02
-	 * @param invoker
-	 * @param invocation
-	 * @return
-	 */
-	private static String getServiceId(Invoker<?> invoker, Invocation invocation) {
-		Type[] paramTypes = invocation.getParameterTypes();
-		StringBuilder serviceIdBuilder = new StringBuilder(invoker.getInterface().getName()).append(SPLITOR)
-				.append(invocation.getMethodName()).append(SPLITOR);
-		StringBuilder builder = new StringBuilder("");
-		if (ArrayUtils.isNotEmpty(paramTypes)) {
-			for (Type type : paramTypes) {
-				builder.append(type.toString());
-			}
-		}
-		String hexStr = DigestUtils.md5DigestAsHex(builder.toString().getBytes());
-		serviceIdBuilder.append(StringUtils.substring(hexStr, 0, 8));
-		return serviceIdBuilder.toString();
 	}
 
 }
