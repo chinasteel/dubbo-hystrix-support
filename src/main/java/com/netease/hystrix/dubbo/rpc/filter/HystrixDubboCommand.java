@@ -32,7 +32,7 @@ public class HystrixDubboCommand extends HystrixCommand<Result> {
 						.withExecutionIsolationStrategy(ExecutionIsolationStrategy.THREAD)
 						// 请求容量阈值
 						.withCircuitBreakerRequestVolumeThreshold(20)
-						// 熔断器中断请求30秒后会进入半打开状态,放部分流量过去重试
+						// 熔断器中断请求30秒后会进入半打开状态,放部分流量过去重试 默认5s
 						.withCircuitBreakerSleepWindowInMilliseconds(30000)
 						// 错误率达到50开启熔断保护
 						.withCircuitBreakerErrorThresholdPercentage(50)
@@ -58,7 +58,7 @@ public class HystrixDubboCommand extends HystrixCommand<Result> {
 	}
 
 	@Override
-	protected Result getFallback() {
+	protected Result getFallback() {// 可以根据不同接口配置不同的Result策略
 		Throwable throwable = this.getFailedExecutionException();
 		if(throwable instanceof RpcException) {
 			return fallBackTimeOutResult;
